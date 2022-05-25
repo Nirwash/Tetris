@@ -135,6 +135,98 @@ class AppModel {
 
     }
 
+    private fun resetField(ephemeralCellsOnly: Boolean = true) {
+        for (i in 0 until ROW_COUNT.value) {
+            (0 until COLUMN_COUNT.value)
+                .filter { !ephemeralCellsOnly || field[i][it] == EPHEMERAL.value }
+                .forEach { field[i][it] = EMPTY.value }
+        }
+    }
+
+    private fun persistCellData() {
+        for (i in field.indices) {
+            for (j in 0 until field[i].size) {
+                var status = getCellStatus(i, j)
+                if (status == EPHEMERAL.value) {
+                    status = currentBlock?.staticValue
+                    setCellStatus(i, j, status)
+                }
+            }
+        }
+    }
+
+    private fun assessField() {
+        for (i in 0 until field.size) {
+            var emptyCells = 0
+            for (j in 0 until field[i].size) {
+                val status = getCellStatus(i, j)
+                val isEmpty = EMPTY.value == status
+                if (isEmpty) emptyCells++
+                if (emptyCells == 0) shiftRows(i)
+            }
+        }
+    }
+
+    private fun translateBlock(position: Point, frameNumber: Int) {
+        synchronized(field) {
+            val shape: Array<ByteArray>? = currentBlock?.getShape(frameNumber)
+            if (shape != null) {
+                for (i in shape.indices) {
+                    for (j in 0 until shape[i].size) {
+                        val y = position.y + i
+                        val x = position.x + j
+                        if (EMPTY.value != shape[i][j]) {
+                            field[y][x] = shape[i][j]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun blockAdditionPossible(): Boolean {
+        if (!moveValid(currentBlock?.position as Point, currentBlock?.frameNumber)) {
+            return false
+        }
+        return true
+    }
+
+    private fun shiftRows(ntoRow: Int) {
+        if (ntoRow > 0) {
+            for (j in ntoRow -1 downTo 0) {
+                for (m in 0 until field[j].size) {
+                    setCellStatus(j + 1, m, getCellStatus(j, m))
+                }
+            }
+        }
+        for (j in 0 until field[0].size) {
+            setCellStatus(0, j, EMPTY.value)
+        }
+    }
+
+    fun startGame() {
+        if (!isGameActive()) {
+            currentState = ACTIVE.name
+            generateNextBlock()
+        }
+    }
+
+    fun resetGame() {
+        resetModel()
+        startGame()
+    }
+
+    fun endGame() {
+        score = 0
+        currentState = OVER.name
+    }
+
+    private fun resetModel() {
+        resetField(false)
+        currentState = AWAITING_START.name
+        score = 0
+    }
+
 
 
     enum class Statues {

@@ -6,8 +6,8 @@ import com.nirwashh.android.tetris.databinding.ActivityGameBinding
 import com.nirwashh.android.tetris.storage.AppPreferences
 
 class GameActivity : AppCompatActivity() {
-    private lateinit var preferences: AppPreferences
-    private lateinit var b: ActivityGameBinding
+    lateinit var preferences: AppPreferences
+    lateinit var b: ActivityGameBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityGameBinding.inflate(layoutInflater)
