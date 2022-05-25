@@ -5,4 +5,7 @@
     <string name="exit">exit</string>
     <string name="reset_score">reset score</string>
     <string name="high_score_default">High score: 0</string>
+    <string name="high_score">high score</string>
+    <string name="current_score">current score</string>
+    <string name="restart">restart</string>
 </resources>
